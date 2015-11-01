@@ -2,18 +2,25 @@ import random
 import string
 
 import cherrypy
+import json
 
 
-
-class StringGeneratorWebService(object):
+class ValidateUser(object):
  exposed = True
 
 
 #need to create threads for handling multiple requests? 
 
- @cherrypy.tools.accept(media='text/plain')
+ @cherrypy.tools.accept(media='text/JSON')
  def GET(self):
-     return cherrypy.session['mystring']
+     #return cherrypy.session['mystring']
+     user = {
+            'username':"faircoder",
+            'password':"servethepi123"
+
+     }
+     #return mock JSON
+     return json.dumps(user)
 
  def POST(self, length=8):
      some_string = ''.join(random.sample(string.hexdigits, int(length)))
@@ -32,8 +39,8 @@ if __name__ == '__main__':
          'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
          'tools.sessions.on': True,
          'tools.response_headers.on': True,
-         'tools.response_headers.headers': [('Content-Type', 'text/plain')],
+         'tools.response_headers.headers': [('Content-Type', 'text/JSON')],
      }
  }
- cherrypy.config.update({'server.socket_port':8080,})  
- cherrypy.quickstart(StringGeneratorWebService(), '/', conf)
+ #cherrypy.config.update({'server.socket_port':8080,})  
+ cherrypy.quickstart(ValidateUser(), '/', conf)
