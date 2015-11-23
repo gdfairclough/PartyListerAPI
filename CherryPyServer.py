@@ -67,6 +67,7 @@ if __name__ == '__main__':
 
     eventDict = json.loads(event_json)
     eventInfo = eventDict.get("EVENT_INFO")
+    eventId = eventInfo.get("ID")
     name = eventInfo.get("NAME")
     date = eventInfo.get("DATE")
     date = datetime.strptime(date, date_format)
@@ -75,13 +76,24 @@ if __name__ == '__main__':
     location = eventInfo.get("LOCATION")
     description = eventInfo.get("DESC")
 
-    event_string = "Name: %s, Date: %s, Start %s, End: %s, Location: %s, Description: %s"%(name,date,start,end,location,description)
+    #event_string = "Name: %s, Date: %s, Start %s, End: %s, Location: %s, Description: %s"%(name,date,start,end,location,description)
 
     acknowledge = 'SUCCESS'
     try:
         conn = getDatabaseConnection()
         cur = conn.cursor()
-        cur.execute('insert into Event (Event_name, Location, Date, Start_time, End_Time, Event_des) VALUES("%s","%s","%s","%s","%s","%s")'%(name,location,date,start,end,description))
+        #insert or update depending on if the event id is already in the database
+        if eventId == -1:
+            cur.execute('INSERT INTO Event (Event_name, Location, Date, Start_time, End_Time, Event_des)'+
+            ' VALUES("%s","%s","%s","%s","%s","%s")'%(name,location,date,start,end,description))
+            #get the id of the event that was just inserted 
+            cur.execute('SELECT MAX(Event_Id) FROM Event')
+            newId = cur.fetchone
+            print(newId)
+        else:
+            print('update Event SET Event_name = \'%s\', Location = \'%s\', Date = "%s", Start_time = "%s", End_Time = "%s", Event_des=\'%s\' WHERE Event_Id = %s'%(name,location,date,start,end,description,eventId))
+            cur.execute('update Event SET Event_name = \'%s\', Location = \'%s\', Date = "%s", Start_time = "%s", End_Time = "%s", Event_des=\'%s\' WHERE Event_Id = %s'%(name,location,date,start,end,description,eventId))
+            
 
         conn.commit()
         cur.close()
